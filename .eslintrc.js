@@ -15,6 +15,10 @@ module.exports = {
   plugins: [
     'html'
   ],
+  globals: {
+    'define': true,
+    'kndfunc': true
+  },
   // add your custom rules here
   'rules': {
     // allow paren-less arrow functions
@@ -23,5 +27,8 @@ module.exports = {
     'generator-star-spacing': 0,
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
+    // "semi": ["error", "always"] // 强制使用分号
+    // "one-var": 0, // 允许连续声明
+    // "one-redeclare": 0, // for循环允许多个声明
   }
 }

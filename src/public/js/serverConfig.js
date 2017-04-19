@@ -1,5 +1,5 @@
 /**
- * @file 配置文件
+ * @file 服务器接口配置文件
  * @author hewnelin
  * @date 2017/4/12
  */

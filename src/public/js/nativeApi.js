@@ -3,10 +3,10 @@
  * 原生API
  */
 import Vue from 'vue';
-import resource from 'vue-resource';
-import Spinner from './spin.min';
+// import resource from 'vue-resource';
+// import Spinner from './spin.min';
 // 测试角色配置
-Vue.use(resource);
+// Vue.use(resource);
 define(function (require, exports, module) {
   /**
    * 判断系统环境
@@ -201,17 +201,17 @@ define(function (require, exports, module) {
           str = str.substring(0, str.length-1);
         }
       }
-      Vue.http({
-        headers: option.header || {},
-        url: option.url + str,
-        method: option.type,
-        emulateJSON: option.emulateJSON,
-        body: option.param
-      }).then(function (retData) {
-        window[funcName](retData.data);
-      }, function (retData) {
-        window[errorName](retData);
-      });
+      // Vue.http({
+      //   headers: option.header || {},
+      //   url: option.url + str,
+      //   method: option.type,
+      //   emulateJSON: option.emulateJSON,
+      //   body: option.param
+      // }).then(function (retData) {
+      //   window[funcName](retData.data);
+      // }, function (retData) {
+      //   window[errorName](retData);
+      // });
       // $.ajax({
       //     'url' : option.url,
       //     'type' : option.type,
@@ -333,17 +333,17 @@ define(function (require, exports, module) {
           str = str.substring(0, str.length-1);
         }
       }
-      Vue.http({
-        headers: option.header || {},
-        url: option.url + str,
-        method: option.type,
-        emulateJSON: option.emulateJSON,
-        body: option.param
-      }).then(function (retData) {
-        window[funcName](retData.data);
-      }, function (retData) {
-        window[errorName](retData);
-      });
+      // Vue.http({
+      //   headers: option.header || {},
+      //   url: option.url + str,
+      //   method: option.type,
+      //   emulateJSON: option.emulateJSON,
+      //   body: option.param
+      // }).then(function (retData) {
+      //   window[funcName](retData.data);
+      // }, function (retData) {
+      //   window[errorName](retData);
+      // });
     }
   }
   //
@@ -425,17 +425,17 @@ define(function (require, exports, module) {
       }, 100);
       option.error(retData);
     };
-    Vue.http({
-      headers: option.header || {},
-      url: option.url,
-      method: option.type,
-      emulateJSON: option.emulateJSON,
-      data: option.param
-    }).then(function (retData) {
-      window[funcName](retData.data);
-    }, function (retData) {
-      window[errorName](retData);
-    });
+    // Vue.http({
+    //   headers: option.header || {},
+    //   url: option.url,
+    //   method: option.type,
+    //   emulateJSON: option.emulateJSON,
+    //   data: option.param
+    // }).then(function (retData) {
+    //   window[funcName](retData.data);
+    // }, function (retData) {
+    //   window[errorName](retData);
+    // });
 
   }
   var frameCount = 0;
