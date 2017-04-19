@@ -1,4 +1,5 @@
 var path = require('path')
+var webpack = require('webpack')
 var utils = require('./utils')
 var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
@@ -23,7 +24,9 @@ module.exports = {
     extensions: ['.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src')
+      '@': resolve('src'),
+      'serverConfig': resolve('src/public/js/serverConfig.js'),
+      'nativeApi': resolve('src/public/js/nativeApi.js'),
     }
   },
   module: {
@@ -35,7 +38,8 @@ module.exports = {
         include: [resolve('src'), resolve('test')],
         options: {
           formatter: require('eslint-friendly-formatter')
-        }
+        },
+        exclude: [/node_modules/, /public/]
       },
       {
         test: /\.vue$/,
@@ -64,5 +68,11 @@ module.exports = {
         }
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      serverConfig: 'serverConfig',
+      nativeApi: 'nativeApi'
+    })
+  ]
 }

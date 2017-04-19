@@ -94,7 +94,7 @@ module.exports = {
       sourceMap: false
     }),
     new webpack.DllPlugin({
-      path: path.join(__dirname, "/dist/public/js/manifest.json"),
+      path: path.join(__dirname, "../dist/public/js/manifest.json"),
       name: "[name]",
       context: projectRoot
     }),

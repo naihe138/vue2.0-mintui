@@ -1,13 +1,16 @@
 var path = require('path')
+var fs = require('fs')
 var utils = require('./utils')
 var webpack = require('webpack')
 var config = require('../config')
 var merge = require('webpack-merge')
+var AddFilesWebpackPlugin = require('./add-files-webpack-plugin');
 var baseWebpackConfig = require('./webpack.base.conf')
 var CopyWebpackPlugin = require('copy-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
+var projectRoot = path.resolve(__dirname, '../');
 
 var env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
@@ -38,6 +41,7 @@ var webpackConfig = merge(baseWebpackConfig, {
       },
       sourceMap: false
     }),
+    new webpack.optimize.OccurrenceOrderPlugin(),
     // extract css into its own file
     new ExtractTextPlugin({
       filename: '[name]/[name].css'
@@ -52,36 +56,22 @@ var webpackConfig = merge(baseWebpackConfig, {
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
-    new HtmlWebpackPlugin({
-      filename: 'demo/index.html',
-      template: 'index.html',
-      inject: true,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true
-        // more options:
-        // https://github.com/kangax/html-minifier#options-quick-reference
-      },
-      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-      chunksSortMode: 'dependency',
-      chunks: ['demo']
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'demo2/index.html',
-      template: 'index.html',
-      inject: true,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true
-        // more options:
-        // https://github.com/kangax/html-minifier#options-quick-reference
-      },
-      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-      chunksSortMode: 'dependency',
-      chunks: ['demo2']
-    }),
+    // new HtmlWebpackPlugin({
+    //   filename: 'demo/index.html',
+    //   template: 'index.html',
+    //   inject: true,
+    //   minify: {
+    //     removeComments: true,
+    //     collapseWhitespace: true,
+    //     removeAttributeQuotes: true
+    //     // more options:
+    //     // https://github.com/kangax/html-minifier#options-quick-reference
+    //   },
+    //   // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+    //   chunksSortMode: 'dependency',
+    //   chunks: ['demo']
+    // }),
+    //
     // split vendor js into its own file
     // new webpack.optimize.CommonsChunkPlugin({
     //   name: 'vendor',
@@ -102,14 +92,19 @@ var webpackConfig = merge(baseWebpackConfig, {
     //   name: 'manifest',
     //   chunks: ['vendor']
     // }),
+    new webpack.DllReferencePlugin({
+      context: projectRoot,
+      manifest: JSON.parse(fs.readFileSync(path.resolve(config.build.assetsRoot, 'public/js/manifest.json'), 'utf8'))
+    }),
     // copy custom static assets
-    // new CopyWebpackPlugin([
-    //   {
-    //     from: path.resolve(__dirname, '../static'),
-    //     to: config.build.assetsSubDirectory,
-    //     ignore: ['.*']
-    //   }
-    // ])
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../src/public/img/'),
+        to: path.resolve(__dirname, '../dist/public/img/'),
+        ignore: ['.*']
+      }
+    ]),
+    new AddFilesWebpackPlugin({path: '../public/js/public.js'})
   ]
 })
 
@@ -135,5 +130,24 @@ if (config.build.bundleAnalyzerReport) {
   var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
   webpackConfig.plugins.push(new BundleAnalyzerPlugin())
 }
+
+for (var key in baseWebpackConfig.entry) {
+  webpackConfig.plugins.push(
+    new HtmlWebpackPlugin({
+      filename: key + '/index.html',
+      template: 'index.html',
+      chunks: [key],
+      inject: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+      },
+      chunksSortMode: 'dependency'
+    })
+  );
+}
+
+
 
 module.exports = webpackConfig
