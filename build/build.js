@@ -16,6 +16,7 @@ spinner.start()
 
 rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
   if (err) throw err
+  /*
   webpack(webpackPublicConfig, function (err, stats) {
     if (err) throw err
     webpack(webpackConfig, function (err, stats) {
@@ -36,7 +37,7 @@ rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
       ))
     })
   })
-  /*
+  */
   webpack(webpackConfig, function (err, stats) {
     spinner.stop()
     if (err) throw err
@@ -54,5 +55,4 @@ rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
       '  Opening index.html over file:// won\'t work.\n'
     ))
   })
-   */
 })

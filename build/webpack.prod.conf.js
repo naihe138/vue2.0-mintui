@@ -73,29 +73,31 @@ var webpackConfig = merge(baseWebpackConfig, {
     // }),
     //
     // split vendor js into its own file
-    // new webpack.optimize.CommonsChunkPlugin({
-    //   name: 'vendor',
-    //   minChunks: function (module, count) {
-    //     // any required modules inside node_modules are extracted to vendor
-    //     return (
-    //       module.resource &&
-    //       /\.js$/.test(module.resource) &&
-    //       module.resource.indexOf(
-    //         path.join(__dirname, '../node_modules')
-    //       ) === 0
-    //     )
-    //   }
-    // }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'public',
+      filename: 'public/js/public.js',
+      minChunks: function (module, count) {
+        // any required modules inside node_modules are extracted to vendor
+        return (
+          module.resource &&
+          /\.js$/.test(module.resource) &&
+          module.resource.indexOf(
+            path.join(__dirname, '../node_modules')
+          ) === 0
+        )
+      }
+    }),
     // extract webpack runtime and module manifest to its own file in order to
     // prevent vendor hash from being updated whenever app bundle is updated
     // new webpack.optimize.CommonsChunkPlugin({
     //   name: 'manifest',
     //   chunks: ['vendor']
     // }),
-    new webpack.DllReferencePlugin({
-      context: projectRoot,
-      manifest: JSON.parse(fs.readFileSync(path.resolve(config.build.assetsRoot, 'public/js/manifest.json'), 'utf8'))
-    }),
+    // public模块依赖
+    // new webpack.DllReferencePlugin({
+    //   context: projectRoot,
+    //   manifest: JSON.parse(fs.readFileSync(path.resolve(config.build.assetsRoot, 'public/js/manifest.json'), 'utf8'))
+    // }),
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -104,13 +106,13 @@ var webpackConfig = merge(baseWebpackConfig, {
         ignore: ['.*']
       }
     ]),
+    // 给每个 html 插入 public js
     new AddFilesWebpackPlugin({path: '../public/js/public.js'})
   ]
 })
 
 if (config.build.productionGzip) {
   var CompressionWebpackPlugin = require('compression-webpack-plugin')
-
   webpackConfig.plugins.push(
     new CompressionWebpackPlugin({
       asset: '[path].gz[query]',
