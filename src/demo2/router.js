@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Hello from './components/Hello'
+import UiTest from './components/uitest.vue'
 
 Vue.use(Router)
 
@@ -10,6 +11,11 @@ export default new Router({
       path: '/',
       name: 'Hello',
       component: Hello
+    },
+    {
+      path: '/uitest',
+      name: 'UiTest',
+      component: UiTest
     }
   ]
 })

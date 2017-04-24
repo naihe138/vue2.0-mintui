@@ -23,7 +23,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
-      'vue$': 'vue/dist/vue.esm.js',
+      'vue$': 'vue/dist/vue',
       '@': resolve('src'),
       'serverConfig': resolve('src/public/js/serverConfig.js'),
       'nativeApi': resolve('src/public/js/nativeApi.js'),
@@ -72,7 +72,8 @@ module.exports = {
   plugins: [
     new webpack.ProvidePlugin({
       serverConfig: 'serverConfig',
-      nativeApi: 'nativeApi'
+      nativeApi: 'nativeApi',
+      Vue: 'vue$'
     })
   ]
 }
