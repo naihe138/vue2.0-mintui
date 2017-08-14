@@ -1,7 +1,5 @@
 <template>
 	<div class="hello">
-		<h1 @click="showImgView">显示隐藏</h1>
-		<img v-for="(item, index) in imgArr" :src="item" @click="selectImg(index)">
 		<transition name="slide-fade" class="fadeView">
 			<div v-if="show">
 				<image-view :imgArr="imgArr"
@@ -10,19 +8,22 @@
 										:imageIndex="imageIndex"></image-view>
 			</div>
 		</transition>
+		<h1 @click="showImgView">显示隐藏</h1>
+		<img v-for="(item, index) in imgArr" :src="item" @click="selectImg(index)">
 	</div>
 </template>
 
 <script>
-  import vueImageView from 'vue-imageview'
+  import imageView from './imageView.vue'
   export default {
     name: 'hello',
     components: {
-      'image-view': vueImageView
+      'image-view': imageView
     },
     data () {
       return {
-        imgArr: ['../public/img/1.jpeg', '../public/img/2.jpeg', '/public/img/2.jpeg', '/public/img/3.jpeg', '/public/img/4.jpeg', '/public/img/5.jpeg', '/public/img/6.jpeg'],
+        msg: 'Welcome to Your Vue.js App',
+        imgArr: ['../public/img/1.jpeg', '../public/img/2.jpeg', '../public/img/2.jpeg', '../public/img/3.jpeg', '../public/img/4.jpeg', '../public/img/5.jpeg', '../public/img/6.jpeg'],
         show: false,
         imageIndex: 0
       }
@@ -44,10 +45,26 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-	h1, h2 {
-		font-weight: normal;
+	.slide-fade-enter-active {
+		transition: opacity .5s ease;
 	}
 
+	.slide-fade-leave-active {
+		transition: opacity .5s ease;
+	}
+
+	.slide-fade-enter, .slide-fade-leave-active {
+		opacity: 0;
+	}
+	h1, h2 {
+		margin: 0;
+		padding: 0;
+	}
+	img {
+		display: block;
+		margin: 10px auto;
+		max-width: 400px;
+	}
 	ul {
 		list-style-type: none;
 		padding: 0;
@@ -57,7 +74,6 @@
 		display: inline-block;
 		margin: 0 10px;
 	}
-
 	a {
 		color: #42b983;
 	}

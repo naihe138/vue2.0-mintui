@@ -1,17 +1,21 @@
 var path = require('path')
 var webpack = require('webpack')
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 var utils = require('./utils')
 var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
 
-function resolve (dir) {
+function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
 
 module.exports = {
   entry: {
     demo: './src/demo/index.js',
-    demo2: './src/demo2/index.js'
+    demo2: './src/demo2/index.js',
+    demo3: './src/demo3/index.js',
+    mixin: './src/mixin/index.js',
+    vuex: './src/vuex/index.js'
   },
   output: {
     path: config.build.assetsRoot,
@@ -56,7 +60,7 @@ module.exports = {
         loader: 'url-loader',
         options: {
           limit: 1,
-          name: utils.assetsPath('img/[name].[hash:7].[ext]')
+          name: utils.assetsPath('img/[name].[ext]')
         }
       },
       {
@@ -74,6 +78,9 @@ module.exports = {
       serverConfig: 'serverConfig',
       nativeApi: 'nativeApi',
       Vue: 'vue$'
-    })
+    }),
+    new CopyWebpackPlugin([{
+      from: 'src/index.html'
+    }])
   ]
 }

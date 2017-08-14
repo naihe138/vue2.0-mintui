@@ -1,0 +1,15 @@
+body {
+  font-family: 'Roboto Mono', serif;
+  display: flex;
+  justify-content: center;
+}
+
+#app {
+  text-align: center;
+  margin: 60px;
+  max-width: 370px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}

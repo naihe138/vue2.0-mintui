@@ -22,10 +22,6 @@
 </template>
 
 <script>
-  import {APIS} from 'serverConfig'
-  import nativeApi from 'nativeApi'
-  console.log(nativeApi)
-  console.log(APIS)
   export default {
     name: 'hello',
     data () {

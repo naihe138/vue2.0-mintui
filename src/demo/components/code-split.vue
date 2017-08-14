@@ -22,7 +22,7 @@
     },
     data () {
       return {
-        imgArr: ['../public/img/1.jpeg', '../public/img/2.jpeg', '/public/img/2.jpeg', '/public/img/3.jpeg', '/public/img/4.jpeg', '/public/img/5.jpeg', '/public/img/6.jpeg'],
+        imgArr: ['/public/img/1.jpeg'],
         show: false,
         imageIndex: 0
       }
