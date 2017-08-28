@@ -1,0 +1,8 @@
+body {
+  font-family: 'Roboto Mono', serif;
+}
+
+#app {
+  margin: 60px;
+  max-width: 370px;
+}

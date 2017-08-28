@@ -15,7 +15,10 @@ module.exports = {
     demo2: './src/demo2/index.js',
     demo3: './src/demo3/index.js',
     mixin: './src/mixin/index.js',
-    vuex: './src/vuex/index.js'
+    vuex: './src/vuex/index.js',
+    zoomImage: './src/zoomImage/index.js',
+    scroll: './src/vue-scroll/index.js',
+    arearSelect: './src/LAear/index.js'
   },
   output: {
     path: config.build.assetsRoot,
@@ -35,16 +38,16 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.(js|vue)$/,
-        loader: 'eslint-loader',
-        enforce: 'pre',
-        include: [resolve('src'), resolve('test')],
-        options: {
-          formatter: require('eslint-friendly-formatter')
-        },
-        exclude: [/node_modules/, /public/]
-      },
+      // {
+      //   test: /\.(js|vue)$/,
+      //   loader: 'eslint-loader',
+      //   enforce: 'pre',
+      //   include: [resolve('src'), resolve('test')],
+      //   options: {
+      //     formatter: require('eslint-friendly-formatter')
+      //   },
+      //   exclude: [/node_modules/, /public/]
+      // },
       {
         test: /\.vue$/,
         loader: 'vue-loader',
