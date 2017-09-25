@@ -4,7 +4,7 @@
 * @date 2017/9/22
 */
 <template>
-	<div style="width: 1000px; margin: 100px auto">
+	<div style="width: 800px; margin: 100px auto">
 		<vue-table :tdata="tableData" :tcolumns="tableColumns" v-on:clickItem="tableSelectItem">
 			<template slot="operations" scope="scope">
 				<span @click="edit(scope.item)">编辑</span>

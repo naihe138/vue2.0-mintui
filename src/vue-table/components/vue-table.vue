@@ -6,22 +6,24 @@
 <template>
 	<div id="tableComponent" ref="tableScroll">
 		<!--内容 -->
-		<div style="position: relative; overflow: auto; height: 300px" ref="aScroll">
+		<div class="content" :style="titleFixed == 'fixed' ? {overflow: 'auto', height: scrollHight + 'px'} : {}"
+				 ref="aScroll">
 			<!--左边固定-->
-			<div class="table-fixed-left">
-				<div class="table-header">
+			<div class="table-fixed-left" v-if="showSelect">
+				<div class="table-header" :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',
+				overflow:'hidden', zIndex: 1}: {}">
 					<table cellpadding="0px" cellspacing="0px">
 						<colgroup>
 							<col style="width: 50px; min-width: 50px;"/>
 						</colgroup>
 						<thead>
-						<tr>
+						<tr :style="{height: titleHeight + 'px'}">
 							<th><input type="checkbox"></th>
 						</tr>
 						</thead>
 					</table>
 				</div>
-				<div class="table-body">
+				<div class="table-body" :style="titleFixed == 'fixed' ? {paddingTop: titleHeight + 'px'} : ''">
 					<table cellpadding="0px" cellspacing="0px">
 						<colgroup>
 							<col style="width: 50px; min-width: 50px;"/>
@@ -30,7 +32,8 @@
 						<tr v-for="(item, index) in tdata"
 								@mouseenter="mouseEnter(index)"
 								@mouseout="mouseOut(index)"
-								:class="toTrClass(index)">
+								:class="toTrClass(index)"
+								:style="{height: tdHeight + 'px'}">
 							<td><input type="checkbox" :value="index" v-model="checkedItem" :disabled="isDisAbled(index)"></td>
 						</tr>
 						</tbody>
@@ -38,21 +41,21 @@
 				</div>
 			</div>
 			<!--中间滚动内容-->
-			<div class="table-scroll" ref="cScroll">
-				<div class="table-header" :style="{width: tableContentWith + 'px', position: 'fixed', overflow:
-				'hidden'}">
+			<div class="table-scroll" :class="contentClass()" ref="cScroll">
+				<div class="table-header"
+						 :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',overflow:'hidden'}: {}">
 					<table :style="{width: setWithd}" ref="cHead">
 						<colgroup>
 							<col v-for="item in tcolumns" :style="{width: item.width+'px', minWidth: item.width + 'px'}"/>
 						</colgroup>
 						<thead>
-						<tr>
+						<tr :style="{height: titleHeight + 'px'}">
 							<th v-for="item in tcolumns">{{item.title}}</th>
 						</tr>
 						</thead>
 					</table>
 				</div>
-				<div class="table-body" style="padding-top: 60px">
+				<div class="table-body" :style="titleFixed == 'fixed' ? {paddingTop: titleHeight + 'px'} : ''">
 					<table :style="{width: setWithd}">
 						<colgroup>
 							<col v-for="item in tcolumns" :style="{width: item.width+'px', minWidth: item.width + 'px'}"/>
@@ -62,7 +65,9 @@
 								@mouseenter="mouseEnter(index)"
 								@mouseout="mouseOut(index)"
 								@click="tItamClick(dataItem)"
-								:class="toTrClass(index)">
+								:class="toTrClass(index)"
+								:style="{height: tdHeight + 'px'}"
+						>
 							<td v-for="item in tcolumns"
 									:class="'text' + item.textAlign"
 									v-ellipsis="dataItem[item.key] + ',' +item.textLine">{{dataItem[item.key]}}</td>
@@ -72,20 +77,20 @@
 				</div>
 			</div>
 			<!--右边固定-->
-			<div class="table-fixed-right">
-				<div class="table-header">
+			<div class="table-fixed-right" v-if="showHandle">
+				<div class="table-header" :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',overflow:'hidden'}: {}">
 					<table>
 						<colgroup>
 							<col style="width: 150px"/>
 						</colgroup>
 						<thead>
-						<tr>
+						<tr :style="{height: titleHeight + 'px'}">
 							<th>操作</th>
 						</tr>
 						</thead>
 					</table>
 				</div>
-				<div class="table-body">
+				<div class="table-body" :style="titleFixed == 'fixed' ? {paddingTop: titleHeight + 'px'} : ''">
 					<table>
 						<colgroup>
 							<col style="width: 150px"/>
@@ -94,7 +99,9 @@
 						<tr v-for="(item, index) in tdata"
 								@mouseenter="mouseEnter(index)"
 								@mouseout="mouseOut(index)"
-								:class="toTrClass(index)">
+								:class="toTrClass(index)"
+								:style="{height: tdHeight + 'px'}"
+						>
 							<td :class="isDisAbled(index) ? 'textDisable' : ''">
 								<slot name="operations" :item="item">
 									<span>编辑</span>
@@ -134,7 +141,34 @@
       tdata: {
         type: Array,
         default: []
-      }
+      },
+			// 显示选择空间
+      showSelect: {
+        type: Boolean,
+        default: false
+			},
+			// 显示操作列表
+			showHandle: {
+        type: Boolean,
+        default: false
+			},
+			// 头部是否固定
+      titleFixed: {
+        type: String,
+        default: 'auto'
+			},
+      titleHeight: {
+        type: Number,
+        default: 40
+      },
+      tdHeight: {
+        type: Number,
+        default: 60
+      },
+      scrollHight: {
+        type: Number,
+        default: 400
+			}
     },
     data() {
       return {
@@ -224,12 +258,17 @@
       initTableWidth() {
         const tableScroll = this.$refs.tableScroll
         let AllWidth = 0
+				if (!this.showSelect) {
+          this.checkBoxWidth = 0
+				}
+        if (!this.showHandle) {
+          this.handleWith = 0
+        }
         this.tableContentWith = tableScroll.offsetWidth - this.checkBoxWidth - this.handleWith
-				console.log(this.tableContentWith)
         this.tcolumns.forEach(item => {
           AllWidth += item.width
         })
-        if (AllWidth > tableScroll.offsetWidth) {
+				if (AllWidth > tableScroll.offsetWidth) {
           this.setWithd = AllWidth + 'px'
         } else {
           this.setWithd = '100%'
@@ -240,7 +279,17 @@
       },
       changePage(page) {
         this.$emit('chagePage', page)
-      }
+      },
+			contentClass() {
+        let str = ''
+				if (this.showSelect) {
+          str += 'showSelect'
+				}
+        if (this.showHandle) {
+          str += ' showHandle '
+        }
+        return str
+			}
     },
     mounted() {
       const _this = this
@@ -251,8 +300,10 @@
         window.removeEventListener('resize', this.initTableWidth)
 			}
       this.$refs.cScroll.addEventListener('scroll', (e) => {
-        console.log(e.target.scrollLeft)
-        _this.$refs.cHead.style.transform = 'translateX('+-(e.target.scrollLeft)+'px)'
+        // console.log(e.target.scrollLeft)
+				if (this.titleFixed === 'fixed') {
+          _this.$refs.cHead.style.transform = 'translateX('+-(e.target.scrollLeft)+'px)'
+				}
       })
     },
     destroyed() {
@@ -277,6 +328,7 @@
 	td, th {
 		border: 1px solid #ccc;
 		box-sizing: border-box;
+		background: #ffffff;
 	}
 
 	th {
@@ -285,13 +337,13 @@
 	}
 
 	tr {
-		height: 60px;
 		box-sizing: border-box;
 		overflow: hidden;
+		border-right: 1px solid #ccc;
+		border-bottom: 1px solid #ccc;
 	}
 
 	td {
-		height: 60px;
 		overflow: hidden;
 	}
 
@@ -302,6 +354,9 @@
 		font-size: 14px;
 	}
 
+	.content {
+		position: relative;
+	}
 	.table-fixed-left {
 		position: absolute;
 		left: 0;
@@ -310,10 +365,13 @@
 			text-align: center;
 		}
 	}
-
-	.table-scroll {
+	.showSelect{
 		margin-left: 50px;
+	}
+	.showHandle{
 		margin-right: 150px;
+	}
+	.table-scroll {
 		overflow: scroll;
 		overflow-y: hidden;
 		td, th {
@@ -329,6 +387,7 @@
 		right: 0;
 		top: 0;
 		.table-body {
+			background: #ffffff;
 			td {
 				text-align: center;
 			}
