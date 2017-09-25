@@ -18,7 +18,8 @@ module.exports = {
     vuex: './src/vuex/index.js',
     zoomImage: './src/zoomImage/index.js',
     scroll: './src/vue-scroll/index.js',
-    arearSelect: './src/LAear/index.js'
+    arearSelect: './src/LAear/index.js',
+    vueTable: './src/vue-table/index.js'
   },
   output: {
     path: config.build.assetsRoot,
