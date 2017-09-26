@@ -9,7 +9,7 @@
 		<div class="content" :style="titleFixed == 'fixed' ? {overflow: 'auto', height: scrollHight + 'px'} : {}"
 				 ref="aScroll">
 			<!--左边固定-->
-			<div class="table-fixed-left" v-if="showSelect">
+			<div class="table-fixed-left" v-if="showSelect && selectFixed">
 				<div class="table-header" :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',
 				overflow:'hidden', zIndex: 1}: {}">
 					<table cellpadding="0px" cellspacing="0px">
@@ -41,16 +41,20 @@
 				</div>
 			</div>
 			<!--中间滚动内容-->
-			<div class="table-scroll" :class="contentClass()" ref="cScroll">
+			<div class="table-scroll" ref="cScroll">
 				<div class="table-header"
 						 :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',overflow:'hidden'}: {}">
-					<table :style="{width: setWithd}" ref="cHead">
+					<table class="scroll-header" :style="{width: setWithd}" ref="cHead">
 						<colgroup>
+							<col v-if="showSelect" style="width: 50px; min-width: 50px"/>
 							<col v-for="item in tcolumns" :style="{width: item.width+'px', minWidth: item.width + 'px'}"/>
+							<col v-if="showHandle" style="width: 150px; min-width: 150px"/>
 						</colgroup>
 						<thead>
-						<tr :style="{height: titleHeight + 'px'}">
+						<tr :style="{height: titleHeight + 'px', borderBottom: titleFixed=='auto' ? 0 : '1px solid #ccc'}">
+							<th v-if="showSelect"><input type="checkbox"></th>
 							<th v-for="item in tcolumns">{{item.title}}</th>
+							<th v-if="showHandle">操作</th>
 						</tr>
 						</thead>
 					</table>
@@ -58,7 +62,9 @@
 				<div class="table-body" :style="titleFixed == 'fixed' ? {paddingTop: titleHeight + 'px'} : ''">
 					<table :style="{width: setWithd}">
 						<colgroup>
+							<col v-if="showSelect" style="width: 50px; min-width: 50px"/>
 							<col v-for="item in tcolumns" :style="{width: item.width+'px', minWidth: item.width + 'px'}"/>
+							<col v-if="showHandle" style="width: 150px; min-width: 150px"/>
 						</colgroup>
 						<tbody>
 						<tr v-for="(dataItem, index) in tdata"
@@ -68,17 +74,28 @@
 								:class="toTrClass(index)"
 								:style="{height: tdHeight + 'px'}"
 						>
+							<td v-if="showSelect"><input type="checkbox" :value="index" v-model="checkedItem" :disabled="isDisAbled(index)"></td>
 							<td v-for="item in tcolumns"
 									:class="'text' + item.textAlign"
-									v-ellipsis="dataItem[item.key] + ',' +item.textLine">{{dataItem[item.key]}}</td>
+									v-ellipsis="dataItem[item.key] + ',' +item.textLine">{{dataItem[item.key]}}
+							</td>
+							<td :class="isDisAbled(index) ? 'textDisable' : ''"
+									v-if="showHandle">
+								<slot name="operations" :item="dataItem">
+									<span>编辑</span>
+									<span>删除</span>
+									<span>禁用1</span>
+								</slot>
+							</td>
 						</tr>
 						</tbody>
 					</table>
 				</div>
 			</div>
 			<!--右边固定-->
-			<div class="table-fixed-right" v-if="showHandle">
-				<div class="table-header" :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',overflow:'hidden'}: {}">
+			<div class="table-fixed-right" v-if="showHandle && handleFixed">
+				<div class="table-header"
+						 :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',overflow:'hidden'}: {}">
 					<table>
 						<colgroup>
 							<col style="width: 150px"/>
@@ -142,21 +159,21 @@
         type: Array,
         default: []
       },
-			// 显示选择空间
+      // 显示选择空间
       showSelect: {
         type: Boolean,
         default: false
-			},
-			// 显示操作列表
-			showHandle: {
+      },
+      // 显示操作列表
+      showHandle: {
         type: Boolean,
         default: false
-			},
-			// 头部是否固定
+      },
+      // 头部是否固定
       titleFixed: {
         type: String,
         default: 'auto'
-			},
+      },
       titleHeight: {
         type: Number,
         default: 40
@@ -168,7 +185,15 @@
       scrollHight: {
         type: Number,
         default: 400
-			}
+      },
+      selectFixed: {
+        type: Boolean,
+        default: false
+      },
+      handleFixed: {
+        type: Boolean,
+        default: false
+      }
     },
     data() {
       return {
@@ -176,10 +201,10 @@
         checkedItem: [],
         setWithd: '1000px',
         currentPage: 1,
-				// 宽度配置
-				checkBoxWidth: 50,
-				tableContentWith: 600,
-				handleWith: 150
+        // 宽度配置
+        checkBoxWidth: 50,
+        tableContentWith: 600,
+        handleWith: 150
       }
     },
     directives: {
@@ -187,26 +212,28 @@
         bind(el, binding) {
           let line = 1
           if (binding.value) {
-            let val = (binding.value).split(',')
-						line = val[1]
-					}
+            let val = (
+              binding.value).split(',')
+            line = val[1]
+          }
           setTimeout(() => {
-						let max = el.offsetWidth
+            let max = el.offsetWidth
             max = max * line
-            let text = (binding.value).trim().replace(' ','　') //for fix white-space bug
+            let text = (
+              binding.value).trim().replace(' ', '　') //for fix white-space bug
             let ellipsisChar = '...'
             let clone = el.cloneNode(true)
             clone.style.visibility = 'hidden'
             clone.style.whiteSpace = 'nowrap'
             clone.style.width = 'auto'
-						document.body.appendChild(clone)
+            document.body.appendChild(clone)
             let width = clone.offsetWidth
-            if(width > max){
-              let stop =  Math.floor(text.length * max / width);
-              let temp_str = text.substring(0,stop) + ellipsisChar;
+            if (width > max) {
+              let stop = Math.floor(text.length * max / width);
+              let temp_str = text.substring(0, stop) + ellipsisChar;
               clone.innerHTML = temp_str
               width = clone.offsetWidth
-              if(width > max){
+              if (width > max) {
                 while (width > max && stop > 1) {
                   stop--;
                   temp_str = text.substring(0, stop) + ellipsisChar;
@@ -214,22 +241,22 @@
                   width = clone.offsetWidth
                 }
               }
-              else if(width < max){
+              else if (width < max) {
                 while (width < max && stop < text.length) {
                   stop++;
                   temp_str = text.substring(0, stop) + ellipsisChar;
                   clone.innerHTML = temp_str
                   width = clone.offsetWidth
                 }
-                if(width > max){
-                  temp_str = text.substring(0,stop -1) + ellipsisChar;
+                if (width > max) {
+                  temp_str = text.substring(0, stop - 1) + ellipsisChar;
                 }
               }
               el.innerHTML = temp_str
             }
             document.body.removeChild(clone);
           }, 0)
-				}
+        }
       }
     },
     methods: {
@@ -258,17 +285,22 @@
       initTableWidth() {
         const tableScroll = this.$refs.tableScroll
         let AllWidth = 0
-				if (!this.showSelect) {
+        if (!this.showSelect) {
           this.checkBoxWidth = 0
-				}
+        } else {
+          AllWidth += 50
+        }
         if (!this.showHandle) {
           this.handleWith = 0
+        } else {
+          AllWidth += 150
         }
-        this.tableContentWith = tableScroll.offsetWidth - this.checkBoxWidth - this.handleWith
+        // this.tableContentWith = tableScroll.offsetWidth - this.checkBoxWidth - this.handleWith
+        this.tableContentWith = tableScroll.offsetWidth
         this.tcolumns.forEach(item => {
           AllWidth += item.width
         })
-				if (AllWidth > tableScroll.offsetWidth) {
+        if (AllWidth > tableScroll.offsetWidth) {
           this.setWithd = AllWidth + 'px'
         } else {
           this.setWithd = '100%'
@@ -280,35 +312,38 @@
       changePage(page) {
         this.$emit('chagePage', page)
       },
-			contentClass() {
+      contentClass() {
         let str = ''
-				if (this.showSelect) {
+        if (this.showSelect) {
           str += 'showSelect'
-				}
+        }
         if (this.showHandle) {
           str += ' showHandle '
         }
         return str
-			}
+      }
     },
     mounted() {
       const _this = this
+      let timer = null
       if (this.$refs.tableScroll) {
         this.initTableWidth()
         window.addEventListener('resize', this.initTableWidth)
-			} else {
+      } else {
         window.removeEventListener('resize', this.initTableWidth)
-			}
+      }
       this.$refs.cScroll.addEventListener('scroll', (e) => {
-        // console.log(e.target.scrollLeft)
-				if (this.titleFixed === 'fixed') {
-          _this.$refs.cHead.style.transform = 'translateX('+-(e.target.scrollLeft)+'px)'
-				}
+        clearInterval(timer)
+        timer = setTimeout(() => {
+          if (this.titleFixed === 'fixed') {
+            _this.$refs.cHead.style.transform = 'translateX(' + -(e.target.scrollLeft) + 'px)'
+          }
+        }, 10)
       })
     },
     destroyed() {
       window.removeEventListener('resize', this.initTableWidth)
-		},
+    },
     watch: {
       checkedItem: function (val) {
         console.log(val)
@@ -318,13 +353,15 @@
 </script>
 
 <style lang="less" scoped>
-	*{
+	* {
 		margin: 0;
 		padding: 0;
 	}
-	table{
+
+	table {
 		border-collapse: collapse
 	}
+
 	td, th {
 		border: 1px solid #ccc;
 		box-sizing: border-box;
@@ -354,9 +391,14 @@
 		font-size: 14px;
 	}
 
+	.handleFixed {
+		/*transition: 0.3s;*/
+	}
+
 	.content {
 		position: relative;
 	}
+
 	.table-fixed-left {
 		position: absolute;
 		left: 0;
@@ -365,12 +407,15 @@
 			text-align: center;
 		}
 	}
-	.showSelect{
+
+	.showSelect {
 		margin-left: 50px;
 	}
-	.showHandle{
+
+	.showHandle {
 		margin-right: 150px;
 	}
+
 	.table-scroll {
 		overflow: scroll;
 		overflow-y: hidden;

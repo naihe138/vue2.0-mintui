@@ -4,15 +4,19 @@
 * @date 2017/9/22
 */
 <template>
-	<div style="width: 800px; margin: 100px auto;">
+	<div style="width: 800px; margin: 100px auto; overflow: hidden; position: relative">
 		<vue-table :tdata="tableData"
 							 :tcolumns="tableColumns"
 							 :showSelect="tableSelect"
-							 :showHandle="tableHandle" :titleFixed="'fixed'"
+							 :showHandle="tableHandle"
+							 :titleFixed="titleFixed"
 							 :titleHeight="titleHeight"
 							 :tdHeight="tdHeight"
 							 :scrollHight="scrollHight"
-							 v-on:clickItem="tableSelectItem" v-on:chagePage="chagePage">
+							 :selectFixed="selectFixed"
+							 :handleFixed="handleFixed"
+							 v-on:clickItem="tableSelectItem"
+							 v-on:chagePage="chagePage">
 			<template slot="operations" scope="scope">
 				<span @click="edit(scope.item)">编辑</span>
 				<span @click="edit(scope.item)">删除</span>
@@ -85,10 +89,13 @@
         tableData: tabledata,
         tableColumns: columns,
 				tableSelect: true,
-        tableHandle: true,
+        tableHandle: false,
+        titleFixed: 'fixed',
 				titleHeight: 50,
 				tdHeight: 70,
-				scrollHight: 400
+				scrollHight: 400,
+				selectFixed: false,
+        handleFixed: false
       }
     },
     methods: {
@@ -99,7 +106,7 @@
         console.log(data)
       },
       chagePage(index) {
-        console.log(index)
+        // console.log(index)
 			}
     }
   };
