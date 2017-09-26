@@ -1,0 +1,50 @@
+/**
+* @file
+* @author 何文林
+* @date 2017/9/26
+*/
+<template>
+	<div id="checkbox" :class="isTrue ? 'active' : ''">
+		<i class="iconfont">{{isTrue ? '&#xe7a1;' : ''}}</i>
+	</div>
+</template>
+
+<script>
+  export default{
+    props: {
+      isTrue: {
+        type: Boolean,
+				default: false
+			},
+      isDisable: {
+        type: Boolean,
+        default: false
+      }
+		}
+	}
+</script>
+
+<style lang="less" scoped>
+	#checkbox{
+		width: 18px;
+		height: 18px;
+		border: 1px solid #7b7b7b;
+		text-align: center;
+		line-height: 16px;
+		font-size: 18px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: inline-block;
+		overflow: hidden;
+		box-sizing: border-box;
+		background: #ffffff;
+	}
+	#checkbox.active{
+		color: #1caf4c;
+		border-color: #1caf4c;
+	}
+	#checkbox:hover{
+		color: #1caf4c;
+		border-color: #1caf4c;
+	}
+</style>

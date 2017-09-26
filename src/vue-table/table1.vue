@@ -15,12 +15,13 @@
 							 :scrollHight="scrollHight"
 							 :selectFixed="selectFixed"
 							 :handleFixed="handleFixed"
+							 :page="page"
 							 v-on:clickItem="tableSelectItem"
-							 v-on:chagePage="chagePage">
+							 v-on:changePage="changePage">
 			<template slot="operations" scope="scope">
 				<span @click="edit(scope.item)">编辑</span>
 				<span @click="edit(scope.item)">删除</span>
-				<span @click="edit(scope.item)">禁用1</span>
+				<span @click="edit(scope.item)">禁用</span>
 			</template>
 		</vue-table>
 	</div>
@@ -28,6 +29,7 @@
 
 <script>
   import vueTable from './components/vue-table.vue'
+	import checkBox from './components/checkbox.vue'
   import tabledata from './data'
   const columns = [
     {
@@ -41,7 +43,8 @@
       key: 'name',
       width: 250,
       textAlign: 'left',
-      textLine: 2
+      textLine: 2,
+			selectText: true
     },
     {
       title: '商品类别',
@@ -82,20 +85,25 @@
   ]
   export default{
     components: {
-      vueTable
+      vueTable,
+      checkBox
     },
     data() {
       return {
         tableData: tabledata,
         tableColumns: columns,
 				tableSelect: true,
-        tableHandle: false,
-        titleFixed: 'fixed',
-				titleHeight: 50,
-				tdHeight: 70,
+        tableHandle: true,
+        titleFixed: 'auto',
+				titleHeight: 32,
+				tdHeight: 50,
 				scrollHight: 400,
-				selectFixed: false,
-        handleFixed: false
+				selectFixed: true,
+        handleFixed: true,
+				page: {
+          totalPage: 50,
+          maxSize: 5
+				}
       }
     },
     methods: {
@@ -105,8 +113,8 @@
       edit(data) {
         console.log(data)
       },
-      chagePage(index) {
-        // console.log(index)
+      changePage(index) {
+        console.log(index)
 			}
     }
   };

@@ -17,8 +17,15 @@
 							<col style="width: 50px; min-width: 50px;"/>
 						</colgroup>
 						<thead>
-						<tr :style="{height: titleHeight + 'px'}">
-							<th><input type="checkbox"></th>
+						<tr :style="{height: titleHeight + 'px', borderBottom: (selectFixed=='auto' || selectFixed) ? 0 :
+						'1px solid #ddd'}">
+							<th>
+								<label for="leftall" class="selectLable">
+									<label for="allSelect" class="selectLable" @click="checkedAllItem">
+										<check-box :isTrue="checkedAll"></check-box>
+									</label>
+								</label>
+							</th>
 						</tr>
 						</thead>
 					</table>
@@ -34,7 +41,15 @@
 								@mouseout="mouseOut(index)"
 								:class="toTrClass(index)"
 								:style="{height: tdHeight + 'px'}">
-							<td><input type="checkbox" :value="index" v-model="checkedItem" :disabled="isDisAbled(index)"></td>
+							<td>
+								<label :for="'left1' + index" class="selectLable">
+									<input :id="'left1' + index"
+												 type="checkbox"
+												 :value="index" v-model="checkedItem"
+												 :disabled="isDisAbled(index)">
+									<check-box :isTrue="(checkedItem.indexOf(index) > -1)"></check-box>
+								</label>
+							</td>
 						</tr>
 						</tbody>
 					</table>
@@ -51,8 +66,13 @@
 							<col v-if="showHandle" style="width: 150px; min-width: 150px"/>
 						</colgroup>
 						<thead>
-						<tr :style="{height: titleHeight + 'px', borderBottom: titleFixed=='auto' ? 0 : '1px solid #ccc'}">
-							<th v-if="showSelect"><input type="checkbox"></th>
+						<tr :style="{height: titleHeight + 'px', borderBottom: (selectFixed=='auto' || selectFixed) ? 0 :
+						'1px solid #ddd'}">
+							<th v-if="showSelect">
+								<label for="allSelect" class="selectLable" @click="checkedAllItem">
+									<check-box :isTrue="checkedAll"></check-box>
+								</label>
+							</th>
 							<th v-for="item in tcolumns">{{item.title}}</th>
 							<th v-if="showHandle">操作</th>
 						</tr>
@@ -68,19 +88,27 @@
 						</colgroup>
 						<tbody>
 						<tr v-for="(dataItem, index) in tdata"
-								@mouseenter="mouseEnter(index)"
-								@mouseout="mouseOut(index)"
-								@click="tItamClick(dataItem)"
+								@mouseenter.stop.prevent="mouseEnter(index)"
+								@mouseout.stop.prevent="mouseOut(index)"
+								v-on:click.stop="tItamClick(dataItem)"
 								:class="toTrClass(index)"
 								:style="{height: tdHeight + 'px'}"
 						>
-							<td v-if="showSelect"><input type="checkbox" :value="index" v-model="checkedItem" :disabled="isDisAbled(index)"></td>
+							<td v-if="showSelect">
+								<label :for="'left1' + index" class="selectLable">
+									<input :id="'left1' + index" type="checkbox"
+												 :value="index" v-model="checkedItem"
+												 :disabled="isDisAbled(index)">
+									<check-box :isTrue="(checkedItem.indexOf(index) > -1)"></check-box>
+								</label>
+							</td>
 							<td v-for="item in tcolumns"
 									:class="'text' + item.textAlign"
+									@mouseup="selectText(item.selectText, dataItem[item.key])"
 									v-ellipsis="dataItem[item.key] + ',' +item.textLine">{{dataItem[item.key]}}
 							</td>
 							<td :class="isDisAbled(index) ? 'textDisable' : ''"
-									v-if="showHandle">
+									v-if="showHandle" class="handleAction">
 								<slot name="operations" :item="dataItem">
 									<span>编辑</span>
 									<span>删除</span>
@@ -101,7 +129,8 @@
 							<col style="width: 150px"/>
 						</colgroup>
 						<thead>
-						<tr :style="{height: titleHeight + 'px'}">
+						<tr :style="{height: titleHeight + 'px', borderBottom: (selectFixed=='auto' || selectFixed) ? 0 :
+						'1px solid #ddd'}">
 							<th>操作</th>
 						</tr>
 						</thead>
@@ -119,7 +148,7 @@
 								:class="toTrClass(index)"
 								:style="{height: tdHeight + 'px'}"
 						>
-							<td :class="isDisAbled(index) ? 'textDisable' : ''">
+							<td :class="isDisAbled(index) ? 'textDisable' : ''" class="handleAction">
 								<slot name="operations" :item="item">
 									<span>编辑</span>
 									<span>删除</span>
@@ -134,21 +163,24 @@
 		</div>
 		<!--分页-->
 		<div class="page">
-			<pagination :total-page="50"
+			<pagination :total-page="page.totalPage"
 									:size="'md'"
 									v-model="currentPage"
 									@change="changePage"
-									:max-size="5"></pagination>
+									:max-size="page.maxSize"></pagination>
 		</div>
-
+		<!--划词提示框-->
+		<!--<p class="crossWord">{{crossWord}}</p>-->
 	</div>
 </template>
 
 <script>
   import Pagination from './vue-page.vue'
+  import checkBox from './checkbox.vue'
   export default{
     components: {
-      Pagination
+      Pagination,
+      checkBox
     },
     props: {
       tcolumns: {
@@ -176,11 +208,11 @@
       },
       titleHeight: {
         type: Number,
-        default: 40
+        default: 32
       },
       tdHeight: {
         type: Number,
-        default: 60
+        default: 50
       },
       scrollHight: {
         type: Number,
@@ -193,24 +225,34 @@
       handleFixed: {
         type: Boolean,
         default: false
+      },
+      page: {
+        type: Object,
+        default: {
+          totalPage: 10,
+          maxSize: 10
+        }
       }
     },
     data() {
       return {
         hoverIndex: -1,
         checkedItem: [],
+        checkedAll: false,
         setWithd: '1000px',
         currentPage: 1,
         // 宽度配置
         checkBoxWidth: 50,
         tableContentWith: 600,
-        handleWith: 150
+        handleWith: 150,
+        crossWord: ''
       }
     },
     directives: {
+      // 行数溢出省略号指令
       ellipsis: {
         bind(el, binding) {
-          let line = 1
+          let line = 2
           if (binding.value) {
             let val = (
               binding.value).split(',')
@@ -266,12 +308,14 @@
       mouseOut(e) {
         this.hoverIndex = -1
       },
+			// 鼠标点击一行
       tItamClick(item) {
         if (item.disable) {
           return
         }
         this.$emit('clickItem', item)
       },
+			// 鼠标滑过 class
       toTrClass(index) {
         if (this.tdata[index] && this.tdata[index].disable) {
           return 'trDisable'
@@ -282,6 +326,7 @@
           return ''
         }
       },
+			// 表格初始化宽度
       initTableWidth() {
         const tableScroll = this.$refs.tableScroll
         let AllWidth = 0
@@ -306,21 +351,47 @@
           this.setWithd = '100%'
         }
       },
+			// 判断是否可用
       isDisAbled(index) {
         return this.tdata[index] ? this.tdata[index].disable : false
       },
+			// 分页变动
       changePage(page) {
-        this.$emit('chagePage', page)
+        this.$emit('changePage', page)
       },
-      contentClass() {
-        let str = ''
-        if (this.showSelect) {
-          str += 'showSelect'
+      // 全选或者全不选
+      isAllSelect (isSelect) {
+        const _this = this
+        if (this.tdata.length === 0) {
+          return
         }
-        if (this.showHandle) {
-          str += ' showHandle '
+        if (isSelect) {
+          this.tdata.forEach((item, index) => {
+            if (!item.disable && (
+              this.checkedItem.indexOf(index) < 0)) {
+              _this.checkedItem.push(index)
+            }
+          })
+        } else {
+          _this.checkedItem = []
         }
-        return str
+      },
+			// 全选操作
+      checkedAllItem () {
+        this.checkedAll = !this.checkedAll
+        this.isAllSelect(this.checkedAll)
+      },
+			// 划词提示
+      selectText(isSelect) {
+        if (isSelect) {
+          let txt = ''
+          if (document.selection) {
+            txt = document.selection.createRange().text
+          } else {
+            txt = window.getSelection() + ''
+          }
+          console.log(txt)
+        }
       }
     },
     mounted() {
@@ -336,7 +407,8 @@
         clearInterval(timer)
         timer = setTimeout(() => {
           if (this.titleFixed === 'fixed') {
-            _this.$refs.cHead.style.transform = 'translateX(' + -(e.target.scrollLeft) + 'px)'
+            _this.$refs.cHead.style.transform = 'translateX(' + -(
+                e.target.scrollLeft) + 'px)'
           }
         }, 10)
       })
@@ -346,7 +418,18 @@
     },
     watch: {
       checkedItem: function (val) {
-        console.log(val)
+        let arr = this.tdata
+        let num = 0
+        arr.forEach((item, index) => {
+          if (!item.disable) {
+            num += 1
+          }
+        })
+        if (val.length !== num) {
+          this.checkedAll = false
+        } else {
+          this.checkedAll = true
+        }
       }
     }
   }
@@ -363,7 +446,7 @@
 	}
 
 	td, th {
-		border: 1px solid #ccc;
+		border: 1px solid #ddd;
 		box-sizing: border-box;
 		background: #ffffff;
 	}
@@ -371,13 +454,14 @@
 	th {
 		border-bottom: 0;
 		text-align: center;
+		background: #fafafa;
 	}
 
 	tr {
 		box-sizing: border-box;
 		overflow: hidden;
-		border-right: 1px solid #ccc;
-		border-bottom: 1px solid #ccc;
+		border-right: 1px solid #ddd;
+		border-bottom: 1px solid #ddd;
 	}
 
 	td {
@@ -391,8 +475,17 @@
 		font-size: 14px;
 	}
 
-	.handleFixed {
-		/*transition: 0.3s;*/
+	.selectLable {
+		i {
+			font-size: 18px;
+		}
+		input {
+			display: none;
+		}
+	}
+
+	.titleHeight {
+		background: #fafafa;
 	}
 
 	.content {
@@ -423,7 +516,7 @@
 			border-right: 0;
 		}
 		tr.textDisable {
-			color: #ccc;
+			color: #dddddd;
 		}
 	}
 
@@ -433,33 +526,37 @@
 		top: 0;
 		.table-body {
 			background: #ffffff;
+			tr:hover {
+				background: red;
+			}
 			td {
 				text-align: center;
-			}
-			span {
-				color: blue;
-				padding: 0 5px;
-				cursor: pointer;
 			}
 			span:hover {
 				text-decoration: underline;
 			}
 			td.textDisable {
-				color: #ccc;
+				color: #ddd;
 				span {
-					color: #ccc;
+					color: #ddd;
 				}
 			}
 		}
 	}
 
 	.mouseover {
-		background: #fffa00;
-		color: #333;
+		td {
+			background: #ffffbb;
+		}
+	}
+
+	.selectTr {
+		td {
+			background: #ffffbb;
+		}
 	}
 
 	.trDisable {
-		background: #fcfcfc;
 		color: #ccc;
 	}
 
@@ -478,5 +575,17 @@
 	.page {
 		display: flex;
 		justify-content: flex-end;
+	}
+
+	.handleAction {
+		color: #5a82be;
+		span:hover {
+			text-decoration: underline;
+		}
+	}
+	.crossWord{
+		position: absolute;
+		left: 0;
+		top: 0;
 	}
 </style>
