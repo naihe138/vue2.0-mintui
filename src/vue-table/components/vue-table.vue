@@ -6,32 +6,31 @@
 <template>
 	<div id="tableComponent" ref="tableScroll">
 		<!--内容 -->
-		<div class="content" :style="titleFixed == 'fixed' ? {overflow: 'auto', height: scrollHight + 'px'} : {}"
-				 ref="aScroll">
+		<div class="content">
 			<!--左边固定-->
-			<div class="table-fixed-left" v-if="showSelect && selectFixed">
-				<div class="table-header" :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',
-				overflow:'hidden', zIndex: 1}: {}">
-					<table cellpadding="0px" cellspacing="0px">
+			<div class="table-fixed-left"
+					 v-if="showSelect && selectFixed">
+				<div class="table-header"
+						 :style="titleFixed == 'fixed' ? {position: 'absolute', overflow:'hidden', zIndex: 1}: {}">
+					<table cellpadding="0px" cellspacing="0px" style="width: 50px;">
 						<colgroup>
 							<col style="width: 50px; min-width: 50px;"/>
 						</colgroup>
 						<thead>
-						<tr :style="{height: titleHeight + 'px', borderBottom: (selectFixed=='auto' || selectFixed) ? 0 :
-						'1px solid #ddd'}">
+						<tr :style="{height: titleHeight + 'px', borderBottom: (titleFixed=='auto') ? 0 :
+							'1px solid #ddd'}">
 							<th>
-								<label for="leftall" class="selectLable">
-									<label for="allSelect" class="selectLable" @click="checkedAllItem">
-										<check-box :isTrue="checkedAll"></check-box>
-									</label>
+								<label for="allSelect" class="selectLable" @click="checkedAllItem">
+									<check-box :isTrue="checkedAll"></check-box>
 								</label>
 							</th>
 						</tr>
 						</thead>
 					</table>
 				</div>
-				<div class="table-body" :style="titleFixed == 'fixed' ? {paddingTop: titleHeight + 'px'} : ''">
-					<table cellpadding="0px" cellspacing="0px">
+				<div class="table-body"
+						 :style="titleFixed == 'fixed' ? {paddingTop: titleHeight + 'px', overflow: 'hidden', height: scrollHight + 'px'} : ''">
+					<table cellpadding="0px" cellspacing="0px" style="width: 50px;" ref="tFixedLeft">
 						<colgroup>
 							<col style="width: 50px; min-width: 50px;"/>
 						</colgroup>
@@ -56,9 +55,11 @@
 				</div>
 			</div>
 			<!--中间滚动内容-->
-			<div class="table-scroll" ref="cScroll">
+			<div class="table-scroll"
+					 ref="cScroll"
+					 :style="titleFixed == 'fixed' ? {overflow: 'auto', height: scrollHight + 'px'} : {}">
 				<div class="table-header"
-						 :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',overflow:'hidden'}: {}">
+						 :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'absolute',overflow:'hidden'}: {}">
 					<table class="scroll-header" :style="{width: setWithd}" ref="cHead">
 						<colgroup>
 							<col v-if="showSelect" style="width: 50px; min-width: 50px"/>
@@ -66,7 +67,7 @@
 							<col v-if="showHandle" style="width: 150px; min-width: 150px"/>
 						</colgroup>
 						<thead>
-						<tr :style="{height: titleHeight + 'px', borderBottom: (selectFixed=='auto' || selectFixed) ? 0 :
+						<tr :style="{height: titleHeight + 'px', borderBottom: (titleFixed=='auto') ? 0 :
 						'1px solid #ddd'}">
 							<th v-if="showSelect">
 								<label for="allSelect" class="selectLable" @click="checkedAllItem">
@@ -94,7 +95,7 @@
 								:class="toTrClass(index)"
 								:style="{height: tdHeight + 'px'}"
 						>
-							<td v-if="showSelect">
+							<td v-if="showSelect" class="tbSelect">
 								<label :for="'left1' + index" class="selectLable">
 									<input :id="'left1' + index" type="checkbox"
 												 :value="index" v-model="checkedItem"
@@ -121,23 +122,25 @@
 				</div>
 			</div>
 			<!--右边固定-->
-			<div class="table-fixed-right" v-if="showHandle && handleFixed">
+			<div class="table-fixed-right"
+					 v-if="showHandle && handleFixed">
 				<div class="table-header"
-						 :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'fixed',overflow:'hidden'}: {}">
+						 :style="titleFixed == 'fixed' ? {width: tableContentWith + 'px', position: 'absolute',overflow:'hidden'}: {}">
 					<table>
 						<colgroup>
 							<col style="width: 150px"/>
 						</colgroup>
 						<thead>
-						<tr :style="{height: titleHeight + 'px', borderBottom: (selectFixed=='auto' || selectFixed) ? 0 :
-						'1px solid #ddd'}">
+						<tr :style="{height: titleHeight + 'px', borderBottom: (titleFixed=='auto') ? 0 :
+							'1px solid #ddd'}">
 							<th>操作</th>
 						</tr>
 						</thead>
 					</table>
 				</div>
-				<div class="table-body" :style="titleFixed == 'fixed' ? {paddingTop: titleHeight + 'px'} : ''">
-					<table>
+				<div class="table-body"
+						 :style="titleFixed == 'fixed' ? {paddingTop: titleHeight + 'px', overflow: 'hidden', height: scrollHight + 'px'} : ''">
+					<table ref="tFixedRight">
 						<colgroup>
 							<col style="width: 150px"/>
 						</colgroup>
@@ -162,7 +165,7 @@
 			</div>
 		</div>
 		<!--分页-->
-		<div class="page">
+		<div class="page" v-if="page.totalPage">
 			<pagination :total-page="page.totalPage"
 									:size="'md'"
 									v-model="currentPage"
@@ -228,9 +231,8 @@
       },
       page: {
         type: Object,
-        default: {
-          totalPage: 10,
-          maxSize: 10
+        default: function () {
+          return {}
         }
       }
     },
@@ -271,32 +273,32 @@
             document.body.appendChild(clone)
             let width = clone.offsetWidth
             if (width > max) {
-              let stop = Math.floor(text.length * max / width);
-              let temp_str = text.substring(0, stop) + ellipsisChar;
-              clone.innerHTML = temp_str
+              let stop = Math.floor(text.length * max / width)
+              let tempStr = text.substring(0, stop) + ellipsisChar
+              clone.innerHTML = tempStr
               width = clone.offsetWidth
               if (width > max) {
                 while (width > max && stop > 1) {
-                  stop--;
-                  temp_str = text.substring(0, stop) + ellipsisChar;
-                  clone.innerHTML = temp_str
+                  stop--
+                  tempStr = text.substring(0, (
+                    stop - 5)) + ellipsisChar
+                  clone.innerHTML = tempStr
                   width = clone.offsetWidth
                 }
-              }
-              else if (width < max) {
+              } else if (width < max) {
                 while (width < max && stop < text.length) {
-                  stop++;
-                  temp_str = text.substring(0, stop) + ellipsisChar;
-                  clone.innerHTML = temp_str
+                  stop++
+                  tempStr = text.substring(0, stop) + ellipsisChar
+                  clone.innerHTML = tempStr
                   width = clone.offsetWidth
                 }
                 if (width > max) {
-                  temp_str = text.substring(0, stop - 1) + ellipsisChar;
+                  tempStr = text.substring(0, stop - 1) + ellipsisChar
                 }
               }
-              el.innerHTML = temp_str
+              el.innerHTML = tempStr
             }
-            document.body.removeChild(clone);
+            document.body.removeChild(clone)
           }, 0)
         }
       }
@@ -308,14 +310,14 @@
       mouseOut(e) {
         this.hoverIndex = -1
       },
-			// 鼠标点击一行
+      // 鼠标点击一行
       tItamClick(item) {
         if (item.disable) {
           return
         }
         this.$emit('clickItem', item)
       },
-			// 鼠标滑过 class
+      // 鼠标滑过 class
       toTrClass(index) {
         if (this.tdata[index] && this.tdata[index].disable) {
           return 'trDisable'
@@ -326,7 +328,7 @@
           return ''
         }
       },
-			// 表格初始化宽度
+      // 表格初始化宽度
       initTableWidth() {
         const tableScroll = this.$refs.tableScroll
         let AllWidth = 0
@@ -351,11 +353,11 @@
           this.setWithd = '100%'
         }
       },
-			// 判断是否可用
+      // 判断是否可用
       isDisAbled(index) {
         return this.tdata[index] ? this.tdata[index].disable : false
       },
-			// 分页变动
+      // 分页变动
       changePage(page) {
         this.$emit('changePage', page)
       },
@@ -376,12 +378,12 @@
           _this.checkedItem = []
         }
       },
-			// 全选操作
+      // 全选操作
       checkedAllItem () {
         this.checkedAll = !this.checkedAll
         this.isAllSelect(this.checkedAll)
       },
-			// 划词提示
+      // 划词提示
       selectText(isSelect) {
         if (isSelect) {
           let txt = ''
@@ -392,26 +394,34 @@
           }
           console.log(txt)
         }
+      },
+      // 滚动表格
+      scrollTable (e) {
+        const _this = this
+        let timer = null
+        clearInterval(timer)
+        timer = setTimeout(() => {
+          if (this.titleFixed === 'fixed') {
+            _this.$refs.cHead.style.transform = 'translateZ(0.01px)'
+            _this.$refs.cHead.style.transform = 'translateX(' + -(e.target.scrollLeft) + 'px)'
+            if (_this.selectFixed) {
+              _this.$refs.tFixedLeft.style.transform = 'translateY(' + -(e.target.scrollTop) + 'px)'
+            }
+            if (_this.handleFixed) {
+              _this.$refs.tFixedRight.style.transform = 'translateY(' + -(e.target.scrollTop) + 'px)'
+            }
+          }
+        }, 10)
       }
     },
     mounted() {
-      const _this = this
-      let timer = null
       if (this.$refs.tableScroll) {
         this.initTableWidth()
         window.addEventListener('resize', this.initTableWidth)
       } else {
         window.removeEventListener('resize', this.initTableWidth)
       }
-      this.$refs.cScroll.addEventListener('scroll', (e) => {
-        clearInterval(timer)
-        timer = setTimeout(() => {
-          if (this.titleFixed === 'fixed') {
-            _this.$refs.cHead.style.transform = 'translateX(' + -(
-                e.target.scrollLeft) + 'px)'
-          }
-        }, 10)
-      })
+      this.$refs.cScroll.addEventListener('scroll', this.scrollTable)
     },
     destroyed() {
       window.removeEventListener('resize', this.initTableWidth)
@@ -430,6 +440,7 @@
         } else {
           this.checkedAll = true
         }
+        this.$emit('selectCheck', val)
       }
     }
   }
@@ -442,13 +453,28 @@
 	}
 
 	table {
-		border-collapse: collapse
+		border-collapse: collapse;
+		tr {
+			box-sizing: border-box;
+			overflow: hidden;
+			border-right: 1px solid #ddd;
+			border-bottom: 1px solid #ddd;
+		}
+		tr:nth-of-type(2n) {
+			td {
+				background: #fafafa;
+			}
+		}
+		tr:nth-of-type(2n + 1) {
+			td {
+				background: #fff;
+			}
+		}
 	}
 
 	td, th {
 		border: 1px solid #ddd;
 		box-sizing: border-box;
-		background: #ffffff;
 	}
 
 	th {
@@ -457,15 +483,12 @@
 		background: #fafafa;
 	}
 
-	tr {
-		box-sizing: border-box;
-		overflow: hidden;
-		border-right: 1px solid #ddd;
-		border-bottom: 1px solid #ddd;
-	}
-
 	td {
 		overflow: hidden;
+		img {
+			width: 36px;
+			height: 36px;
+		}
 	}
 
 	#tableComponent {
@@ -482,6 +505,9 @@
 		input {
 			display: none;
 		}
+		& > div {
+			justify-content: center;
+		}
 	}
 
 	.titleHeight {
@@ -490,12 +516,18 @@
 
 	.content {
 		position: relative;
+		overflow: hidden;
 	}
 
 	.table-fixed-left {
 		position: absolute;
 		left: 0;
 		top: 0;
+		z-index: 10;
+		width: 50px;
+		.table-header {
+			z-index: 1;
+		}
 		td {
 			text-align: center;
 		}
@@ -512,6 +544,12 @@
 	.table-scroll {
 		overflow: scroll;
 		overflow-y: hidden;
+		.table-header {
+			z-index: 1;
+		}
+		.tbSelect {
+			text-align: center;
+		}
 		td, th {
 			border-right: 0;
 		}
@@ -524,6 +562,10 @@
 		position: absolute;
 		right: 0;
 		top: 0;
+		z-index: 10;
+		.table-header {
+			z-index: 1;
+		}
 		.table-body {
 			background: #ffffff;
 			tr:hover {
@@ -535,18 +577,12 @@
 			span:hover {
 				text-decoration: underline;
 			}
-			td.textDisable {
-				color: #ddd;
-				span {
-					color: #ddd;
-				}
-			}
 		}
 	}
 
 	.mouseover {
 		td {
-			background: #ffffbb;
+			background: #ffffbb !important;
 		}
 	}
 
@@ -579,11 +615,13 @@
 
 	.handleAction {
 		color: #5a82be;
+		text-align: center;
 		span:hover {
 			text-decoration: underline;
 		}
 	}
-	.crossWord{
+
+	.crossWord {
 		position: absolute;
 		left: 0;
 		top: 0;
